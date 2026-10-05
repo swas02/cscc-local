@@ -1,8 +1,22 @@
 /*! cscc-local - High-performance local Node & Bun client for Country-Level Social Cost of Carbon data */
 'use strict';
 
-const fs = require('node:fs');
-const path = require('node:path');
+const isNode = typeof process !== 'undefined' && process.versions && !!process.versions.node;
+let fs = null;
+let path = null;
+if (isNode && typeof require === 'function') {
+  try {
+    const req = require;
+    fs = req('node:fs');
+    path = req('node:path');
+  } catch (_) {
+    try {
+      const req = require;
+      fs = req('fs');
+      path = req('path');
+    } catch (__) {}
+  }
+}
 
 const LIB_VERSION = '1.0.0';
 const SUPPORTED_FORMAT = 1;
@@ -35,13 +49,14 @@ const bad = (msg, details) => new DataApiError('BAD_OPTION', msg, details);
 
 // ---- auto-detect local data directory --------------------------------------------------------
 function findDefaultDataDir() {
+  if (!fs || !path) return null;
   const candidates = [
-    path.resolve(__dirname, '..'),              // package root when in src/
-    path.resolve(__dirname, '../data/..'),
-    __dirname,                                  // if bundled / flat
-    path.resolve(process.cwd(), 'data/..'),
-    process.cwd(),
-  ];
+    typeof __dirname !== 'undefined' ? path.resolve(__dirname, '..') : null,
+    typeof __dirname !== 'undefined' ? path.resolve(__dirname, '../data/..') : null,
+    typeof __dirname !== 'undefined' ? __dirname : null,
+    typeof process !== 'undefined' && process.cwd ? path.resolve(process.cwd(), 'data/..') : null,
+    typeof process !== 'undefined' && process.cwd ? process.cwd() : null,
+  ].filter(Boolean);
 
   for (const dir of candidates) {
     try {
@@ -72,7 +87,25 @@ function newState() {
 
 function getMode() {
   if (cfg.baseUrl) return 'remote';
+  if (!isNode) return 'remote';
   return 'local';
+}
+
+// In browser environments, default baseUrl to './v1/' or resolve from script tag
+try {
+  if (typeof document !== 'undefined') {
+    const cs = document.currentScript;
+    if (cs) {
+      const attr = cs.getAttribute && cs.getAttribute('data-base-url');
+      if (attr) cfg.baseUrl = withSlash(new URL(attr, document.baseURI).href);
+      else if (cs.src) cfg.baseUrl = cs.src.split(/[?#]/)[0].replace(/[^/]*$/, '');
+    }
+    if (!cfg.baseUrl) cfg.baseUrl = './v1/';
+  } else if (!isNode) {
+    cfg.baseUrl = './v1/';
+  }
+} catch (_) {
+  if (!isNode) cfg.baseUrl = './v1/';
 }
 
 function getLocalDir() {
