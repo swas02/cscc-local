@@ -1,0 +1,61 @@
+name: Release CSCC Data & Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-and-release:
+    name: Compile Binaries & Publish Lightweight Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Compile Binary Datasets
+        run: |
+          python build_cscc.py --csv src/cscc_db_v2.csv --out . --flat --force --no-latest
+
+      - name: Run Test Suite
+        run: |
+          npm test
+
+      - name: Package Lightweight Release Assets (Excludes Raw CSV)
+        run: |
+          # Package only the compact ~3.8 MB binary dataset, metadata, and notices
+          zip -r cscc-data-binaries.zip data meta.json DATA_NOTICE.md LICENSE
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            cscc-data-binaries.zip
+            meta.json
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
