@@ -83,17 +83,38 @@ Because every country shares the exact same 1,458 scenario combinations in the e
 
 ## Installation & Quickstart
 
-### 1. Clone the Repository
+### 1. Install via npm / GitHub (Recommended)
+
+You can install `cscc-local` directly into any Node.js or Bun project without manually cloning:
+
+```bash
+# Install specific release tag (recommended for reproducibility):
+npm install github:swas02/cscc-local#v1.0.0
+
+# Or install latest from main branch:
+npm install github:swas02/cscc-local
+```
+
+Under Bun:
+```bash
+bun add github:swas02/cscc-local#v1.0.0
+```
+
+### 2. Or Clone the Repository
 
 ```bash
 git clone https://github.com/swas02/cscc-local.git
 cd cscc-local
 ```
 
-### 2. CommonJS (Node.js)
+---
+
+## Usage Examples
+
+### CommonJS (Node.js)
 
 ```javascript
-const cscc = require('.'); // or require('./path/to/cscc-local')
+const cscc = require('cscc-local'); // or require('.') if running inside the cloned repo
 
 async function main() {
   // Query India (IND) for SSP2, RCP 4.5, Discount Rate = 3%
@@ -110,10 +131,10 @@ async function main() {
 main();
 ```
 
-### 3. ES Modules (Node.js 18+ or Bun)
+### ES Modules (Node.js 18+ or Bun)
 
 ```javascript
-import cscc, { getData, getSync } from './src/index.mjs';
+import cscc, { getData, getSync } from 'cscc-local'; // or from './src/index.mjs'
 
 // Asynchronous query
 const rows = await getData('USA', { ssp: 2, rcp: 4.5 });
