@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---------------------------------------------------------------------------
+SCOPE: This license applies only to the source code, parser tooling, build
+scripts, and client libraries in this repository. It does NOT apply to the
+Country-Level Social Cost of Carbon (CSCC) dataset or any data derived from
+it. See DATA_NOTICE.md for the terms governing that data.
+---------------------------------------------------------------------------
