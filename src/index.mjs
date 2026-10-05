@@ -1,21 +1,11 @@
 /*! cscc-local - High-performance local Node & Bun client for Country-Level Social Cost of Carbon data (ESM) */
 
+import * as nodeFs from 'node:fs';
+import * as nodePath from 'node:path';
+
 const isNode = typeof process !== 'undefined' && process.versions && !!process.versions.node;
-let fs = null;
-let path = null;
-if (isNode && typeof require === 'function') {
-  try {
-    const req = require;
-    fs = req('node:fs');
-    path = req('node:path');
-  } catch (_) {
-    try {
-      const req = require;
-      fs = req('fs');
-      path = req('path');
-    } catch (__) {}
-  }
-}
+let fs = isNode ? nodeFs : null;
+let path = isNode ? nodePath : null;
 
 const LIB_VERSION = '1.0.0';
 const SUPPORTED_FORMAT = 1;
@@ -46,13 +36,25 @@ export class DataApiError extends Error {
 }
 const bad = (msg, details) => new DataApiError('BAD_OPTION', msg, details);
 
+function getDirname() {
+  if (typeof __dirname !== 'undefined') return __dirname;
+  try {
+    if (typeof import.meta !== 'undefined' && import.meta.url && typeof import.meta.url === 'string' && import.meta.url.startsWith('file:')) {
+      const p = decodeURIComponent(import.meta.url.replace(/^file:\/\/\/?/, '').replace(/^\/([A-Za-z]:)/, '$1'));
+      return path ? path.dirname(p) : null;
+    }
+  } catch (_) {}
+  return null;
+}
+
 // ---- auto-detect local data directory --------------------------------------------------------
 function findDefaultDataDir() {
   if (!fs || !path) return null;
+  const d = getDirname();
   const candidates = [
-    typeof __dirname !== 'undefined' ? path.resolve(__dirname, '..') : null,
-    typeof __dirname !== 'undefined' ? path.resolve(__dirname, '../data/..') : null,
-    typeof __dirname !== 'undefined' ? __dirname : null,
+    d ? path.resolve(d, '..') : null,
+    d ? path.resolve(d, '../data/..') : null,
+    d,
     typeof process !== 'undefined' && process.cwd ? path.resolve(process.cwd(), 'data/..') : null,
     typeof process !== 'undefined' && process.cwd ? process.cwd() : null,
   ].filter(Boolean);
