@@ -109,13 +109,14 @@ def main():
     ap.add_argument("--expect-rows", type=int, default=247860, help="total CSV rows (change for new data versions)")
     ap.add_argument("--expect-countries", type=int, default=170)
     ap.add_argument("--expect-per-country", type=int, default=1458)
+    ap.add_argument("--flat", action="store_true", help="output meta.json and data/ directly into --out without version subfolder")
     ap.add_argument("--force", action="store_true", help="overwrite an existing release folder")
     ap.add_argument("--no-latest", action="store_true", help="do not update latest.json")
     args = ap.parse_args()
 
     if not re.fullmatch(r"[A-Za-z0-9._-]+", args.version):
         fail("version may only contain letters, digits, '.', '_' and '-'")
-    out_dir = os.path.join(args.out, args.version)
+    out_dir = args.out if args.flat else os.path.join(args.out, args.version)
     if os.path.exists(out_dir) and not args.force:
         fail(f"{out_dir} already exists; releases are immutable. Use a new --version, or --force to overwrite.")
 

@@ -1,0 +1,35 @@
+{
+  "name": "cscc-local",
+  "version": "1.0.0",
+  "description": "High-performance, zero-network, local Node.js and Bun client module for Country-Level Social Cost of Carbon (CSCC) data.",
+  "main": "src/index.js",
+  "module": "src/index.mjs",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.mjs",
+      "require": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "node test.js && node test_esm.mjs",
+    "test:bun": "bun test.js && bun test_esm.mjs",
+    "example": "node example.js",
+    "build:data": "python build_cscc.py --csv src/cscc_db_v2.csv --out . --flat --force --no-latest"
+  },
+  "keywords": [
+    "cscc",
+    "social-cost-of-carbon",
+    "carbon-pricing",
+    "climate-change",
+    "environmental-economics",
+    "node",
+    "bun",
+    "offline",
+    "local-dataset"
+  ],
+  "license": "MIT"
+}
